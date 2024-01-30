@@ -1,3 +1,23 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": [
+      "next/core-web-vitals",
+      "prettier",
+      "plugin:storybook/recommended"
+  ],
+  "parserOptions": {
+      "ecmaVersion": 2020,
+      "sourceType": "module"
+  },
+  "env": {
+      "es6": true,
+      "browser": true,
+      "node": true
+  },
+  "rules": {
+      "prefer-const": "warn",
+      "no-console": "warn",
+      "eqeqeq": "warn",
+      "default-case": "warn",
+      "no-unused-vars": "error"
+  }
 }
