@@ -1,22 +1,29 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "League of Memory",
-  description: "Memory game on the theme of league of legends",
-};
+    title: 'Mystic Matches',
+    description: 'Memory game on the mystic theme',
+}
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode
 }>) {
-  return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
-    </html>
-  );
+    return (
+        <html lang='en'>
+            <head>
+                <link rel='icon' href='/favicon.ico' />
+                <meta
+                    name='viewport'
+                    content='width=device-width, initial-scale=1'
+                />
+            </head>
+            <body className={inter.className}>{children}</body>
+        </html>
+    )
 }

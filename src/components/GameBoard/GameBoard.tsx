@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import Card from '../Card/Card'
+import { formatTime } from '@/lib/utils/format-time.utils'
 
 interface GameBoardProps {
     totalPairs: number
@@ -18,6 +19,10 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
     >([])
     // Etat qui indique si la vérification des cartes est en cours
     const [isChecking, setIsChecking] = useState<boolean>(false)
+    // Temps écoulé en secondes
+    const [elapsedTime, setElapsedTime] = useState<number>(0)
+    // Temps initial
+    const [startTime, setStartTime] = useState<number>(0)
 
     useEffect(() => {
         // Création des paires de cartes avec les chemins d'accès aux images
@@ -25,7 +30,8 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
             { length: totalPairs * 2 },
             (_, index) => ({
                 id: index,
-                imagePath: `/img/recto/flipped-${
+                // Le math floor permet de garantir que les paires d'images ont des indices voisins (j'ajoute 1 juste pour commencer à 1 et pas à 0)
+                imagePath: `/img/recto/LoL/flipped-${
                     Math.floor(index / 2) + 1
                 }.png`,
                 isFlipped: false, // Indique si la carte est retournée
@@ -39,6 +45,49 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
         // Mise à jour de l'état avec les cartes mélangées
         setCards(shuffledCards)
     }, [totalPairs])
+
+    useEffect(() => {
+        // Variable pour stocker l'ID de la requête d'animation
+        let requestId: number
+
+        // Fonction de mise à jour du temps écoulé
+        const updateElapsedTime = () => {
+            // Obtient le temps actuel en millisecondes
+            const currentTime = Date.now()
+
+            // Calcule le temps écoulé en millisecondes
+            const elapsedMilliseconds = currentTime - startTime
+
+            // Met à jour l'état avec le temps écoulé
+            setElapsedTime(elapsedMilliseconds)
+
+            // Programme la prochaine mise à jour en utilisant requestAnimationFrame
+            requestId = requestAnimationFrame(updateElapsedTime)
+        }
+
+        // Démarrage de l'animation
+        if (startTime === 0) {
+            // Si startTime est à zéro (donc si c'est la première exécution), met à jour startTime avec l'heure actuelle
+            setStartTime(Date.now())
+        }
+
+        // Démarre l'animation en appelant la fonction de mise à jour
+        requestId = requestAnimationFrame(updateElapsedTime)
+
+        // Nettoyage à la fin ou lorsqu'il y a des changements dans startTime
+        return () => {
+            // Annule l'animationFrame pour arrêter l'animation
+            cancelAnimationFrame(requestId)
+        }
+    }, [startTime, setElapsedTime])
+
+    // Effet séparé pour réinitialiser le temps écoulé à la fin
+    useEffect(() => {
+        return () => {
+            // Réinitialise le temps écoulé à zéro
+            setElapsedTime(0)
+        }
+    }, [])
 
     const handleCardClick = (clickedCard: {
         id: number
@@ -117,15 +166,23 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
 
     return (
         <>
-            {cards.map((card) => (
-                <Card
-                    key={card.id}
-                    imagePath={card.imagePath}
-                    isFlipped={card.isFlipped}
-                    isPaired={card.isPaired}
-                    onClick={() => handleCardClick(card)}
-                />
-            ))}
+            <div className='flex justify-center mb-4'>
+                Temps écoulé : {formatTime(elapsedTime)}
+            </div>
+
+            <div className='flex justify-around'>
+                <div className='grid grid-cols-4 gap-4'>
+                    {cards.map((card) => (
+                        <Card
+                            key={card.id}
+                            imagePath={card.imagePath}
+                            isFlipped={card.isFlipped}
+                            isPaired={card.isPaired}
+                            onClick={() => handleCardClick(card)}
+                        />
+                    ))}
+                </div>
+            </div>
         </>
     )
 }

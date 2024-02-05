@@ -16,20 +16,14 @@ const Card = ({ imagePath, isFlipped, isPaired, onClick }: CardProps) => {
         <div
             className={`card ${isFlipped ? 'flipped' : ''} ${
                 isPaired ? 'paired' : ''
-            }`}
+            } hover:cursor-pointer`}
             onClick={!isFlipped ? onClick : undefined}
         >
-            {/* <Image
-                src='/img/riven-card-back.png'
-                alt={''}
-                width={200}
-                height={200}
-            /> */}
             <Image
                 src={
                     isFlipped || isPaired
                         ? imagePath
-                        : '/img/riven-card-back.png'
+                        : '/img/verso-removebg.png'
                 }
                 alt='Card'
                 width={200}
