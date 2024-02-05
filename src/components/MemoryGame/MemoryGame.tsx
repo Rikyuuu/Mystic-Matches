@@ -1,8 +1,9 @@
 import Image from 'next/image'
 import GameBoard from '../GameBoard/GameBoard'
+import React from 'react'
 
 const MemoryGame = () => {
-    const totalPairs = 8 // On choisi le nombre total de paires de cartes
+    const totalPairs = 4 // On choisi le nombre total de paires de cartes
 
     return (
         <>
