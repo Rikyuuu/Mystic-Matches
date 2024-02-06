@@ -6,12 +6,23 @@ interface GameBoardProps {
     totalPairs: number
 }
 
+interface CardType {
+    id: number
+    imagePath: string
+    isFlipping: boolean
+    isFlippingBack: boolean
+    isFlipped: boolean
+    isPaired: boolean
+}
+
 const GameBoard = ({ totalPairs }: GameBoardProps) => {
     // Stocke les cartes du jeu
     const [cards, setCards] = useState<
         Array<{
             id: number
             imagePath: string
+            isFlipping: boolean
+            isFlippingBack: boolean
             isFlipped: boolean
             isPaired: boolean
         }>
@@ -23,26 +34,36 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
         // Création des paires de cartes avec les chemins d'accès aux images
         const initialCards = Array.from(
             { length: totalPairs * 2 },
-            (_, index) => ({
-                id: index,
-                imagePath: `/img/recto/flipped-${
-                    Math.floor(index / 2) + 1
-                }.png`,
-                isFlipped: false, // Indique si la carte est retournée
-                isPaired: false, // Indique si la carte forme une paire
-            })
+            (_, index) => createCard(index)
         )
 
         // Mélange des cartes
         const shuffledCards = initialCards.sort(() => Math.random() - 0.5)
 
+        console.log('shuffledCards', shuffledCards)
+
         // Mise à jour de l'état avec les cartes mélangées
         setCards(shuffledCards)
     }, [totalPairs])
 
+    /**
+     * Méthode permettant de créer une carte
+     * @param index Index de la carte
+     * @returns Une carte
+     */
+    const createCard = (index: number): CardType => ({
+        id: index,
+        imagePath: `/img/recto/LoL/flipped-${Math.floor(index / 2) + 1}.png`,
+        isFlipping: false, // Indique si la carte est entrain de se retourner vers le recto
+        isFlippingBack: false, // Indique si la carte est entrain de se retourner vers le verso
+        isFlipped: false, // Indique si la carte est retournée
+        isPaired: false, // Indique si la carte forme une paire
+    })
+
     const handleCardClick = (clickedCard: {
         id: number
         imagePath: string
+        isFlipping: boolean
         isFlipped: boolean
         isPaired: boolean
     }) => {
@@ -54,30 +75,40 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
             return
         }
 
-        // Retourne la carte cliquée
-        const updatedCards = cards.map((card) =>
-            card.id === clickedCard.id ? { ...card, isFlipped: true } : card
+        // Déclenche l'animation verso du retournement de carte vers le recto avant que isFlipped soit mis à true
+        const updatedIsInFlippingCards = cards.map((card) =>
+            card.id === clickedCard.id ? { ...card, isFlipping: true } : card
         )
+        setCards(updatedIsInFlippingCards)
 
-        // Met à jour l'état avec les cartes retournées
-        setCards(updatedCards)
+        setTimeout(() => {
+            // Passe l'état du retournement de la carte cliquée à true (isFlipped) et passe isFlipping à false pour mettre fin à l'animation du retournement verso
+            // et activer la suite de l'animation, le retournement recto.
+            const updatedCards = cards.map((card) =>
+                card.id === clickedCard.id ? { ...card, isFlipped: true } : card
+            )
 
-        // Filtre les cartes retournées non appariées
-        const flippedUnpairedCards = updatedCards.filter(
-            (card) => card.isFlipped && !card.isPaired
-        )
+            // Met à jour l'état avec les cartes retournées
+            setCards(updatedCards)
 
-        // Si deux cartes retournées non appariées, vérifie si elles forment une paire
-        if (flippedUnpairedCards.length === 2) {
-            // Début de la vérification, empêche le clic pendant la vérification
-            setIsChecking(true)
+            // Filtre les cartes retournées non appariées
+            const flippedUnpairedCards = updatedCards.filter(
+                (card) => card.isFlipped && !card.isPaired
+            )
 
-            setTimeout(() => {
-                checkForPairs(flippedUnpairedCards)
-                // Fin de la vérification, autorise les clics
-                setIsChecking(false)
-            }, 1000) // Attend un court délai avant de vérifier les paires
-        }
+            // Si deux cartes retournées non appariées, vérifie si elles forment une paire
+            if (flippedUnpairedCards.length === 2) {
+                // Début de la vérification, empêche le clic pendant la vérification
+                setIsChecking(true)
+
+                setTimeout(() => {
+                    // On vérifie les paires
+                    checkForPairs(flippedUnpairedCards)
+                    // Fin de la vérification, autorise les clics
+                    setIsChecking(false)
+                }, 700) // Attend un court délai avant de vérifier les paires
+            }
+        }, 10) // Attend 10 ms avant de définir isFlipping à false
     }
 
     /**
@@ -100,18 +131,31 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
             // Les cartes forment une paire, on les marques donc comme appariées
             const updatedCards = cards.map((card) =>
                 card.id === firstCard.id || card.id === secondCard.id
-                    ? { ...card, isPaired: true }
+                    ? { ...card, isFlipped: true, isPaired: true }
                     : card
             )
+
             setCards(updatedCards)
         } else {
-            // Les cartes ne forment pas une paire, on les remet face verso
-            const updatedCards = cards.map((card) =>
+            // Les cartes ne forment pas une paire, on met isFlippingBack à true pour déclencher l'animation du retournement face verso
+            const updatedAnimationCards = cards.map((card) =>
                 card.id === firstCard.id || card.id === secondCard.id
-                    ? { ...card, isFlipped: false }
+                    ? { ...card, isFlippingBack: true }
                     : card
             )
-            setCards(updatedCards)
+            setCards(updatedAnimationCards)
+
+            setTimeout(() => {
+                // Comme les cartes ne forment pas une paire et qu'on a attendu l'animation du retournement,
+                // on les remet maintenant face verso après un court délai
+                const resetFlippingStateCards = cards.map((card) =>
+                    card.id === firstCard.id || card.id === secondCard.id
+                        ? { ...card, isFlipped: false }
+                        : card
+                )
+
+                setCards(resetFlippingStateCards)
+            }, 10)
         }
     }
 
@@ -121,6 +165,8 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
                 <Card
                     key={card.id}
                     imagePath={card.imagePath}
+                    isFlipping={card.isFlipping}
+                    isFlippingBack={card.isFlippingBack}
                     isFlipped={card.isFlipped}
                     isPaired={card.isPaired}
                     onClick={() => handleCardClick(card)}
