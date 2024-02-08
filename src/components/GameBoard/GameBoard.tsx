@@ -15,6 +15,9 @@ interface CardType {
     isPaired: boolean
 }
 
+const DELAY_BEFORE_CHECKING_PAIRS = 700
+const DELAY_BEFORE_FLIPPING_BACK = 10
+
 const GameBoard = ({ totalPairs }: GameBoardProps) => {
     // Stocke les cartes du jeu
     const [cards, setCards] = useState<
@@ -39,8 +42,6 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
 
         // Mélange des cartes
         const shuffledCards = initialCards.sort(() => Math.random() - 0.5)
-
-        console.log('shuffledCards', shuffledCards)
 
         // Mise à jour de l'état avec les cartes mélangées
         setCards(shuffledCards)
@@ -96,7 +97,7 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
                 (card) => card.isFlipped && !card.isPaired
             )
 
-            // Si deux cartes retournées non appariées, vérifie si elles forment une paire
+            // Si deux cartes retournées non appariées => vérifie si elles forment une paire
             if (flippedUnpairedCards.length === 2) {
                 // Début de la vérification, empêche le clic pendant la vérification
                 setIsChecking(true)
@@ -106,9 +107,9 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
                     checkForPairs(flippedUnpairedCards)
                     // Fin de la vérification, autorise les clics
                     setIsChecking(false)
-                }, 700) // Attend un court délai avant de vérifier les paires
+                }, DELAY_BEFORE_CHECKING_PAIRS) // Attend un court délai avant de vérifier les paires
             }
-        }, 10) // Attend 10 ms avant de définir isFlipping à false
+        }, DELAY_BEFORE_FLIPPING_BACK) // Attend 10 ms avant de définir isFlipping à false
     }
 
     /**
@@ -155,7 +156,7 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
                 )
 
                 setCards(resetFlippingStateCards)
-            }, 10)
+            }, DELAY_BEFORE_FLIPPING_BACK) // Attend un court délai avant de remettre les cartes face verso
         }
     }
 

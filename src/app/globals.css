@@ -57,3 +57,22 @@ body {
 .animate-reverse-flip {
     animation: reverse-flip 0.6s ease-out;
 }
+
+.animated-message {
+    animation: zoomOut 4s ease-in-out; /* Durée et temporisation */
+    transform-origin: center; /* Pour l'effet zoom */
+    perspective: 1000px; /* Ajoute une perspective */
+}
+
+@keyframes zoomOut {
+    0% {
+        transform: scale(1) translateZ(0); /* Taille et position initiales */
+    }
+    35% {
+        transform: scale(2.5) translateZ(-200px); /* Ralentissement */
+    }
+    100% {
+        transform: scale(5) translateZ(-500px); /* Taille finale et position */
+        opacity: 0; /* Opacité à 0 pour la disparition */
+    }
+}
