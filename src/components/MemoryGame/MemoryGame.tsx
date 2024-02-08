@@ -1,7 +1,7 @@
 'use client'
 import Image from 'next/image'
 import GameBoard from '../GameBoard/GameBoard'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 const DELAY_START_MESSAGE_SHOWED = 4000
 
@@ -14,7 +14,7 @@ const MemoryGame = () => {
         value: "C'est paaaaarti !",
         showed: true,
     })
-    const totalPairs = 4 // On choisi le nombre total de paires de cartes
+    const totalPairs = 2 // On choisi le nombre total de paires de cartes
 
     const handleStartGame = () => {
         setGameStarted(true)
@@ -70,7 +70,7 @@ const MemoryGame = () => {
                             </p>
                         </div>
                     )}
-                    <div className='flex justify-around'>
+                    <div className='flex justify-center'>
                         <div className='grid grid-cols-4 gap-4'>
                             <GameBoard totalPairs={totalPairs} />
                         </div>

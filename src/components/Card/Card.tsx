@@ -1,5 +1,6 @@
 import Image from 'next/image'
-import React from 'react'
+import React, { useEffect } from 'react'
+import { GameStateEnum } from '../GameBoard/GameBoard'
 
 interface CardProps {
     // Chemin du fichier d'image (recto ou verso de la carte)
@@ -12,6 +13,8 @@ interface CardProps {
     isFlipped: boolean
     // Indique si la carte forme une paire
     isPaired: boolean
+    // Etat du jeu
+    gameState: GameStateEnum
     // Fonction qui est appelée lors du clique sur la carte
     onClick: () => void
 }
@@ -22,6 +25,7 @@ const Card = ({
     isFlippingBack,
     isFlipped,
     isPaired,
+    gameState,
     onClick,
 }: CardProps) => {
     return (
@@ -29,8 +33,14 @@ const Card = ({
             className={`${isFlipping ? 'animate-flip' : ''} ${
                 isFlippingBack ? 'animate-reverse-flip' : ''
             } ${isFlipped ? 'animate-flip' : 'animate-reverse-flip'} ${
-                isPaired ? 'opacity-60' : 'hover:cursor-pointer'
-            }`}
+                isPaired ? '' : 'hover:cursor-pointer'
+            } ${
+                isPaired && gameState !== GameStateEnum.FINISHED && 'opacity-60'
+            } ${
+                gameState === GameStateEnum.FINISHED
+                    ? 'opacity-100 animation-stack-in-line'
+                    : ''
+            } flex justify-center`}
             onClick={!isFlipped ? onClick : undefined}
         >
             <Image
@@ -40,10 +50,10 @@ const Card = ({
                         : '/img/riven-card-back.png'
                 }
                 alt='Card'
-                width={224}
-                height={224}
-                sizes='width: 14rem auto, height: 14rem auto'
                 priority={true}
+                width={`${isFlipped || isPaired ? 224 : 335}`}
+                height={`${isFlipped || isPaired ? 224 : 335}`}
+                // sizes='width: 14rem auto, height: 14rem auto'
                 // className='w-auto h-auto max-w-56 max-h-56'
             />
         </div>

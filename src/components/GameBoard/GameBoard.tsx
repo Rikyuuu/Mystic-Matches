@@ -15,6 +15,11 @@ interface CardType {
     isPaired: boolean
 }
 
+export enum GameStateEnum {
+    IN_PROGRESS = 'IN_PROGRESS',
+    FINISHED = 'FINISHED',
+}
+
 const DELAY_BEFORE_CHECKING_PAIRS = 700
 const DELAY_BEFORE_FLIPPING_BACK = 10
 
@@ -32,6 +37,9 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
     >([])
     // Etat qui indique si la vérification des cartes est en cours
     const [isChecking, setIsChecking] = useState<boolean>(false)
+    const [gameState, setGameState] = useState<GameStateEnum>(
+        GameStateEnum.IN_PROGRESS
+    )
 
     useEffect(() => {
         // Création des paires de cartes avec les chemins d'accès aux images
@@ -135,8 +143,9 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
                     ? { ...card, isFlipped: true, isPaired: true }
                     : card
             )
-
             setCards(updatedCards)
+
+            checkGameIsFinished(updatedCards)
         } else {
             // Les cartes ne forment pas une paire, on met isFlippingBack à true pour déclencher l'animation du retournement face verso
             const updatedAnimationCards = cards.map((card) =>
@@ -144,6 +153,7 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
                     ? { ...card, isFlippingBack: true }
                     : card
             )
+
             setCards(updatedAnimationCards)
 
             setTimeout(() => {
@@ -154,9 +164,17 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
                         ? { ...card, isFlipped: false }
                         : card
                 )
-
                 setCards(resetFlippingStateCards)
             }, DELAY_BEFORE_FLIPPING_BACK) // Attend un court délai avant de remettre les cartes face verso
+        }
+    }
+
+    // Vérifie si toutes les cartes sont appariées
+    const checkGameIsFinished = (cardsToCheck) => {
+        const isGameFinished = cardsToCheck.every((card) => card.isPaired)
+
+        if (isGameFinished) {
+            setGameState(GameStateEnum.FINISHED)
         }
     }
 
@@ -170,6 +188,7 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
                     isFlippingBack={card.isFlippingBack}
                     isFlipped={card.isFlipped}
                     isPaired={card.isPaired}
+                    gameState={gameState}
                     onClick={() => handleCardClick(card)}
                 />
             ))}
