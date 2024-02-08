@@ -64,6 +64,11 @@ body {
     perspective: 1000px; /* Ajoute une perspective */
 }
 
+.animation-stack-in-line {
+    transition: margin-left 1s ease-in-out;
+    margin-left: calc(-197px * 2);
+}
+
 @keyframes zoomOut {
     0% {
         transform: scale(1) translateZ(0); /* Taille et position initiales */
@@ -76,3 +81,9 @@ body {
         opacity: 0; /* Opacité à 0 pour la disparition */
     }
 }
+
+/* TODO: Rajouter cette classe à ma div de cartes si je rajoute l'empilage des colonnes */
+/* .animation-stack-in-column {
+    transition: margin-top 1s ease-in-out;
+    margin-top: calc(-70px * 2);
+} */
