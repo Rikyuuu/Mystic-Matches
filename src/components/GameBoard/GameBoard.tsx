@@ -3,7 +3,10 @@ import React, { useEffect, useState } from 'react'
 import Card from '../Card/Card'
 
 interface GameBoardProps {
+    // Nombre de paires de cartes
     totalPairs: number
+    // Fonction appelée lors de la fin du jeu
+    onCountFlipChange: (newCount: number) => void
 }
 
 interface CardType {
@@ -23,7 +26,7 @@ export enum GameStateEnum {
 const DELAY_BEFORE_CHECKING_PAIRS = 700
 const DELAY_BEFORE_FLIPPING_BACK = 10
 
-const GameBoard = ({ totalPairs }: GameBoardProps) => {
+const GameBoard = ({ totalPairs, onCountFlipChange }: GameBoardProps) => {
     // Stocke les cartes du jeu
     const [cards, setCards] = useState<
         Array<{
@@ -40,6 +43,7 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
     const [gameState, setGameState] = useState<GameStateEnum>(
         GameStateEnum.IN_PROGRESS
     )
+    const [countFlip, setCountFlip] = useState<number>(0)
 
     useEffect(() => {
         // Création des paires de cartes avec les chemins d'accès aux images
@@ -145,7 +149,13 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
             )
             setCards(updatedCards)
 
-            checkGameIsFinished(updatedCards)
+            const incrementCountFlip = countFlip + 1
+
+            // Etat pour stocker le nombre de retournement de cartes
+            setCountFlip(incrementCountFlip)
+
+            // vérifie si le jeu est terminé
+            checkGameIsFinished(updatedCards, incrementCountFlip)
         } else {
             // Les cartes ne forment pas une paire, on met isFlippingBack à true pour déclencher l'animation du retournement face verso
             const updatedAnimationCards = cards.map((card) =>
@@ -165,33 +175,53 @@ const GameBoard = ({ totalPairs }: GameBoardProps) => {
                         : card
                 )
                 setCards(resetFlippingStateCards)
+
+                const incrementCountFlip = countFlip + 1
+
+                // Etat pour stocker le nombre de retournement de cartes
+                setCountFlip(incrementCountFlip)
             }, DELAY_BEFORE_FLIPPING_BACK) // Attend un court délai avant de remettre les cartes face verso
         }
     }
 
     // Vérifie si toutes les cartes sont appariées
-    const checkGameIsFinished = (cardsToCheck) => {
+    const checkGameIsFinished = (
+        cardsToCheck: CardType[],
+        countFlipToSend: number
+    ) => {
         const isGameFinished = cardsToCheck.every((card) => card.isPaired)
 
         if (isGameFinished) {
             setGameState(GameStateEnum.FINISHED)
+            onCountFlipChange(countFlipToSend)
         }
     }
 
     return (
         <>
-            {cards.map((card) => (
-                <Card
-                    key={card.id}
-                    imagePath={card.imagePath}
-                    isFlipping={card.isFlipping}
-                    isFlippingBack={card.isFlippingBack}
-                    isFlipped={card.isFlipped}
-                    isPaired={card.isPaired}
-                    gameState={gameState}
-                    onClick={() => handleCardClick(card)}
-                />
-            ))}
+            {countFlip > 0 && (
+                <div>
+                    <h1 className='text-2xl text-center mb-4 opacity-80'>
+                        Nombre de retournements : {countFlip}
+                    </h1>
+                </div>
+            )}
+            <div className='flex justify-center'>
+                <div className='grid grid-cols-4 gap-4'>
+                    {cards.map((card) => (
+                        <Card
+                            key={card.id}
+                            imagePath={card.imagePath}
+                            isFlipping={card.isFlipping}
+                            isFlippingBack={card.isFlippingBack}
+                            isFlipped={card.isFlipped}
+                            isPaired={card.isPaired}
+                            gameState={gameState}
+                            onClick={() => handleCardClick(card)}
+                        />
+                    ))}
+                </div>
+            </div>
         </>
     )
 }
