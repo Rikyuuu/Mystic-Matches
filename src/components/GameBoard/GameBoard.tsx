@@ -5,8 +5,12 @@ import Card from '../Card/Card'
 interface GameBoardProps {
     // Nombre de paires de cartes
     totalPairs: number
+    // Etat du jeu
+    gameState: GameStateEnum
     // Fonction appelée lors de la fin du jeu
     onCountFlipChange: (newCount: number) => void
+    // Fonction appelée lors du changement d'état du jeu
+    onChangeGameState: (newGameState: GameStateEnum) => void
 }
 
 interface CardType {
@@ -19,6 +23,7 @@ interface CardType {
 }
 
 export enum GameStateEnum {
+    NOT_STARTED = 'NOT_STARTED',
     IN_PROGRESS = 'IN_PROGRESS',
     FINISHED = 'FINISHED',
 }
@@ -26,7 +31,12 @@ export enum GameStateEnum {
 const DELAY_BEFORE_CHECKING_PAIRS = 700
 const DELAY_BEFORE_FLIPPING_BACK = 10
 
-const GameBoard = ({ totalPairs, onCountFlipChange }: GameBoardProps) => {
+const GameBoard = ({
+    totalPairs,
+    gameState,
+    onCountFlipChange,
+    onChangeGameState,
+}: GameBoardProps) => {
     // Stocke les cartes du jeu
     const [cards, setCards] = useState<
         Array<{
@@ -40,9 +50,9 @@ const GameBoard = ({ totalPairs, onCountFlipChange }: GameBoardProps) => {
     >([])
     // Etat qui indique si la vérification des cartes est en cours
     const [isChecking, setIsChecking] = useState<boolean>(false)
-    const [gameState, setGameState] = useState<GameStateEnum>(
-        GameStateEnum.IN_PROGRESS
-    )
+    // const [gameState, setGameState] = useState<GameStateEnum>(
+    //     GameStateEnum.IN_PROGRESS
+    // )
     const [countFlip, setCountFlip] = useState<number>(0)
 
     useEffect(() => {
@@ -192,18 +202,18 @@ const GameBoard = ({ totalPairs, onCountFlipChange }: GameBoardProps) => {
         const isGameFinished = cardsToCheck.every((card) => card.isPaired)
 
         if (isGameFinished) {
-            setGameState(GameStateEnum.FINISHED)
+            onChangeGameState(GameStateEnum.FINISHED)
             onCountFlipChange(countFlipToSend)
         }
     }
 
     return (
         <>
-            {countFlip > 0 && (
+            {countFlip > 0 && gameState !== GameStateEnum.FINISHED && (
                 <div>
-                    <h1 className='text-2xl text-center mb-4 opacity-80'>
+                    <h2 className='text-2xl text-center mb-4 opacity-80'>
                         Nombre de retournements : {countFlip}
-                    </h1>
+                    </h2>
                 </div>
             )}
             <div className='flex justify-center'>
