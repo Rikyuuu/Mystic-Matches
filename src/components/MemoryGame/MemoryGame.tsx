@@ -14,7 +14,23 @@ const MemoryGame = () => {
         value: "C'est paaaaarti !",
         showed: true,
     })
-    const totalPairs = 2 // On choisi le nombre total de paires de cartes
+    const [endMessage, setEndMessage] = useState<{
+        value: string
+        showed: boolean
+    }>({
+        value: 'GG !',
+        showed: false,
+    })
+    // Nombre de retournements de cartes
+    const [countFlip, setCountFlip] = useState<number>(0)
+    // Nombre de paires de cartes à trouver
+    const totalPairs = 2
+
+    const handleCountFlip = (newCount: number) => {
+        console.log('newCount', newCount)
+        setEndMessage((prev) => ({ ...prev, showed: true }))
+        setCountFlip(newCount)
+    }
 
     const handleStartGame = () => {
         setGameStarted(true)
@@ -70,11 +86,20 @@ const MemoryGame = () => {
                             </p>
                         </div>
                     )}
-                    <div className='flex justify-center'>
-                        <div className='grid grid-cols-4 gap-4'>
-                            <GameBoard totalPairs={totalPairs} />
+                    <GameBoard
+                        totalPairs={totalPairs}
+                        onCountFlipChange={handleCountFlip}
+                    />
+                    {endMessage.showed && (
+                        <div className='flex flex-col items-center mt-8 opacity-80'>
+                            <div>
+                                <p>
+                                    {endMessage.value} Tu as terminé le jeu,
+                                    avec {countFlip} retournements de cartes.
+                                </p>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </>
             )}
         </>
