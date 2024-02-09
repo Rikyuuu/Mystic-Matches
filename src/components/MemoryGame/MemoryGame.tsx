@@ -1,12 +1,14 @@
 'use client'
 import Image from 'next/image'
-import GameBoard from '../GameBoard/GameBoard'
+import GameBoard, { GameStateEnum } from '../GameBoard/GameBoard'
 import React, { useState } from 'react'
 
 const DELAY_START_MESSAGE_SHOWED = 4000
 
 const MemoryGame = () => {
-    const [gameStarted, setGameStarted] = useState<boolean>(false)
+    const [gameState, setGameState] = useState<GameStateEnum>(
+        GameStateEnum.NOT_STARTED
+    )
     const [startMessage, setStartMessage] = useState<{
         value: string
         showed: boolean
@@ -23,25 +25,36 @@ const MemoryGame = () => {
     })
     // Nombre de retournements de cartes
     const [countFlip, setCountFlip] = useState<number>(0)
+
     // Nombre de paires de cartes à trouver
     const totalPairs = 2
 
     const handleCountFlip = (newCount: number) => {
-        console.log('newCount', newCount)
-        setEndMessage((prev) => ({ ...prev, showed: true }))
+        setEndMessage((previousEndMessage) => ({
+            ...previousEndMessage,
+            showed: true,
+        }))
         setCountFlip(newCount)
     }
 
     const handleStartGame = () => {
-        setGameStarted(true)
+        handleChangeGameState(GameStateEnum.IN_PROGRESS)
         setTimeout(() => {
-            setStartMessage((prev) => ({ ...prev, showed: false }))
+            setStartMessage((previousStartMessage) => ({
+                ...previousStartMessage,
+                showed: false,
+            }))
         }, DELAY_START_MESSAGE_SHOWED)
+    }
+
+    // Fonction appelée pour changer l'état du jeu
+    const handleChangeGameState = (newGameState: GameStateEnum) => {
+        setGameState(newGameState)
     }
 
     return (
         <>
-            {!gameStarted && (
+            {gameState === GameStateEnum.NOT_STARTED && (
                 <div className='flex flex-col justify-center items-center text-2xl my-20 opacity-80'>
                     <div>
                         <h1 className='mb-4'>Ceci est un jeu de mémoire.</h1>
@@ -69,7 +82,7 @@ const MemoryGame = () => {
                     </div>
                 </div>
             )}
-            {gameStarted && (
+            {gameState !== GameStateEnum.NOT_STARTED && (
                 <>
                     <div className='flex justify-center mb-8'>
                         <Image
@@ -79,6 +92,7 @@ const MemoryGame = () => {
                             height={200}
                         />
                     </div>
+
                     {startMessage.showed && (
                         <div className='flex justify-center mb-8'>
                             <p className='animated-message'>
@@ -86,20 +100,26 @@ const MemoryGame = () => {
                             </p>
                         </div>
                     )}
+
                     <GameBoard
+                        gameState={gameState}
                         totalPairs={totalPairs}
                         onCountFlipChange={handleCountFlip}
+                        onChangeGameState={handleChangeGameState}
                     />
-                    {endMessage.showed && (
-                        <div className='flex flex-col items-center mt-8 opacity-80'>
-                            <div>
-                                <p>
-                                    {endMessage.value} Tu as terminé le jeu,
-                                    avec {countFlip} retournements de cartes.
-                                </p>
+
+                    {gameState === GameStateEnum.FINISHED &&
+                        endMessage.showed && (
+                            <div className='flex flex-col items-center mt-8 opacity-80'>
+                                <div>
+                                    <p>
+                                        {endMessage.value} Tu as terminé le jeu,
+                                        avec {countFlip} retournements de
+                                        cartes.
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
                 </>
             )}
         </>
