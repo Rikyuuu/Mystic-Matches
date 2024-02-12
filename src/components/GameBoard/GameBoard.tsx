@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import Card from '../Card/Card'
+import GameStateEnum from '@/interfaces/gameStateEnum'
 
 interface GameBoardProps {
     // Nombre de paires de cartes
@@ -20,12 +21,6 @@ interface CardType {
     isFlippingBack: boolean
     isFlipped: boolean
     isPaired: boolean
-}
-
-export enum GameStateEnum {
-    NOT_STARTED = 'NOT_STARTED',
-    IN_PROGRESS = 'IN_PROGRESS',
-    FINISHED = 'FINISHED',
 }
 
 const DELAY_BEFORE_CHECKING_PAIRS = 700
@@ -209,7 +204,7 @@ const GameBoard = ({
 
     return (
         <>
-            {countFlip > 0 && gameState !== GameStateEnum.FINISHED && (
+            {gameState !== GameStateEnum.FINISHED && (
                 <div>
                     <h2 className='text-2xl text-center mb-4 opacity-80'>
                         Nombre de retournements : {countFlip}

@@ -1,6 +1,6 @@
+import GameStateEnum from '@/interfaces/gameStateEnum'
 import Image from 'next/image'
 import React, { useEffect } from 'react'
-import { GameStateEnum } from '../GameBoard/GameBoard'
 
 interface CardProps {
     // Chemin du fichier d'image (recto ou verso de la carte)
