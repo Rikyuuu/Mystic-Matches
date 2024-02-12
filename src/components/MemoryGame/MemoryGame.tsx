@@ -1,9 +1,10 @@
 'use client'
 import Image from 'next/image'
 import GameBoard from '../GameBoard/GameBoard'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import GameStateEnum from '@/interfaces/gameStateEnum'
 import DifficultyLevelEnum from '@/interfaces/difficultyLevel'
+import { randomInRange, triggerConfetti } from '@/lib/utils/trigger-confetti'
 
 const DELAY_START_MESSAGE_SHOWED = 4000
 
@@ -12,7 +13,7 @@ const MemoryGame = () => {
         GameStateEnum.NOT_STARTED
     )
 
-    // Niveau de difficulté à "moye" par défaut
+    // Niveau de difficulté à "moyen" par défaut
     const [difficultyLevel, setDifficultyLevel] = useState<DifficultyLevelEnum>(
         DifficultyLevelEnum.MEDIUM
     )
@@ -37,9 +38,6 @@ const MemoryGame = () => {
     const [hoveredButton, setHoveredButton] = useState<
         DifficultyLevelEnum | undefined
     >(undefined)
-
-    // Nombre de paires de cartes à trouver
-    // const [totalPairs, setTotalPairs] = useState<number>(4)
 
     const handleCountFlip = (newCount: number) => {
         setEndMessage((previousEndMessage) => ({
@@ -66,6 +64,31 @@ const MemoryGame = () => {
     // Fonction appelée pour changer l'état du jeu
     const handleChangeGameState = (newGameState: GameStateEnum) => {
         setGameState(newGameState)
+        if (newGameState === GameStateEnum.FINISHED) {
+            // Confettis à gauche sur l'écran
+            triggerConfetti({
+                particleCount: 100,
+                startVelocity: 40,
+                spread: 360,
+                ticks: 400,
+                origin: {
+                    x: 0.1,
+                    y: 0.2,
+                },
+            })
+
+            // Confettis à droite sur l'écran
+            triggerConfetti({
+                particleCount: 100,
+                startVelocity: 40,
+                spread: 360,
+                ticks: 400,
+                origin: {
+                    x: 0.9,
+                    y: 0.2,
+                },
+            })
+        }
     }
 
     return (
