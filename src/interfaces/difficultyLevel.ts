@@ -9,9 +9,9 @@ enum DifficultyLevelEnum {
     // Le nombre total de paires de cartes est de 4 en mode facile
     EASY = 4,
     // Le nombre total de paires de cartes est de 6 en mode moyen
-    MEDIUM = 6,
+    MEDIUM = 8,
     // Le nombre total de paires de cartes est de 8 en mode difficile
-    HARD = 8,
+    HARD = 16,
 }
 
 export default DifficultyLevelEnum
