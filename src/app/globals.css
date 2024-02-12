@@ -87,3 +87,42 @@ body {
     transition: margin-top 1s ease-in-out;
     margin-top: calc(-70px * 2);
 } */
+
+/* Animation des boutons du menu de jeu */
+.game-menu-button-animation {
+    transition: transform 0.2s ease-in-out;
+}
+
+.game-menu-button-animation:hover {
+    transform: scale(1.2);
+}
+
+/* Appel de l'animation de la flèche au hover, elle effectue son sens puis le sens opposé de façon infini */
+.scroll-right {
+    animation: scrollRight 0.5s linear infinite alternate-reverse;
+}
+
+/* Appel de l'animation de la flèche au hover, elle effectue son sens puis le sens opposé de façon infini */
+.scroll-left {
+    animation: scrollLeft 0.5s linear infinite alternate-reverse;
+}
+
+/* Animation de la flèche qui va de la droite vers la gauche sur les boutons du menu au hover */
+@keyframes scrollRight {
+    0% {
+        transform: translateX(0%);
+    }
+    100% {
+        transform: translateX(50%);
+    }
+}
+
+/* Animation de la flèche qui va de la gauche vers la droite sur les boutons du menu au hover */
+@keyframes scrollLeft {
+    0% {
+        transform: translateX(0%);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
