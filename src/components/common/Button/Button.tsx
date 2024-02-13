@@ -7,6 +7,7 @@ export enum ButtonTypesEnum {
 interface ButtonProps {
     children: React.ReactNode
     type?: ButtonTypesEnum
+    justify?: 'flex-start' | 'center' | 'flex-end'
     className?: string
     disabled?: boolean
     onClick?: (e?: any) => void
@@ -15,6 +16,7 @@ interface ButtonProps {
 const Button = ({
     children,
     type = ButtonTypesEnum.BUTTON,
+    justify = 'center',
     className,
     disabled,
     onClick,
@@ -31,7 +33,7 @@ const Button = ({
         <button
             type={type}
             onClick={onClick}
-            className={`inline-flex items-center justify-center rounded font-medium ${
+            className={`inline-flex items-center justify-${justify} rounded font-medium ${
                 disabled ? getButtonStyle().disabled : getButtonStyle().active
             } text-md px-4 py-2 ${className}`}
             disabled={disabled}

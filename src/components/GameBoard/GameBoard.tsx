@@ -3,11 +3,15 @@ import React, { useEffect, useState } from 'react'
 import Card from '../Card/Card'
 import GameStateEnum from '@/interfaces/gameStateEnum'
 
-// En ms
+// Délai avant de vérifier les paires (pour ne pas vérifier les paires avant que l'animation de retournement recto ne se termine)
+// (en ms soit 0,7 seconde ici)
 const DELAY_BEFORE_CHECKING_PAIRS = 700
 
-// En ms
-const DELAY_BEFORE_FLIPPING_BACK = 10
+// Délai avant de définir isFlipping à false pour mettre fin à l'animation du retournement verso (en ms soit 0,01s)
+const DELAY_BEFORE_FLIPPING_FALSE = 10
+
+// Délai avant de retourner les cartes face verso pour permettre la mémorisation de l'utilisateur (en ms soit 1 seconde ici)
+const DELAY_PREVIEW_FLIPPING = 1000
 
 interface GameBoardProps {
     // Nombre de paires de cartes
@@ -87,7 +91,7 @@ const GameBoard = ({
         isFlipping: boolean
         isFlipped: boolean
         isPaired: boolean
-    }) => {
+    }): boolean | undefined => {
         // ischecking => Empêche le clique si la vérification des cartes est en cours.
         // clickedCard.isFlipped => Vérifie également si la carte est déjà retournée.
         // clickedCard.isPaired => Vérifie également si la carte est déjà appariée.
@@ -124,12 +128,21 @@ const GameBoard = ({
 
                 setTimeout(() => {
                     // On vérifie les paires
-                    checkForPairs(flippedUnpairedCards)
-                    // Fin de la vérification, autorise les clics
-                    setIsChecking(false)
+                    const isPairedCombination =
+                        checkForPairs(flippedUnpairedCards)
+
+                    // Fin de la vérification, autorise les clics après un court délai pour laisser le temps à l'animation
+                    // des cartes recto vers leur verso se terminer
+                    if (isPairedCombination) {
+                        setIsChecking(false)
+                    } else {
+                        setTimeout(() => {
+                            setIsChecking(false)
+                        }, DELAY_PREVIEW_FLIPPING) // Attend un délai avant de retourner les cartes face verso pour permettre la mémorisation de l'utilisateur
+                    }
                 }, DELAY_BEFORE_CHECKING_PAIRS) // Attend un court délai avant de vérifier les paires
             }
-        }, DELAY_BEFORE_FLIPPING_BACK) // Attend 10 ms avant de définir isFlipping à false
+        }, DELAY_BEFORE_FLIPPING_FALSE) // Attend un délai avant de définir isFlipping à false
     }
 
     /**
@@ -164,17 +177,19 @@ const GameBoard = ({
 
             // vérifie si le jeu est terminé
             checkGameIsFinished(updatedCards, incrementCountFlip)
+
+            return true
         } else {
-            // Les cartes ne forment pas une paire, on met isFlippingBack à true pour déclencher l'animation du retournement face verso
-            const updatedAnimationCards = cards.map((card) =>
-                card.id === firstCard.id || card.id === secondCard.id
-                    ? { ...card, isFlippingBack: true }
-                    : card
-            )
-
-            setCards(updatedAnimationCards)
-
             setTimeout(() => {
+                // Les cartes ne forment pas une paire, on met isFlippingBack à true pour déclencher l'animation du retournement face verso
+                const updatedAnimationCards = cards.map((card) =>
+                    card.id === firstCard.id || card.id === secondCard.id
+                        ? { ...card, isFlippingBack: true }
+                        : card
+                )
+
+                setCards(updatedAnimationCards)
+
                 // Comme les cartes ne forment pas une paire et qu'on a attendu l'animation du retournement,
                 // on les remet maintenant face verso après un court délai
                 const resetFlippingStateCards = cards.map((card) =>
@@ -188,7 +203,9 @@ const GameBoard = ({
 
                 // Etat pour stocker le nombre de retournement de cartes
                 setCountFlip(incrementCountFlip)
-            }, DELAY_BEFORE_FLIPPING_BACK) // Attend un court délai avant de remettre les cartes face verso
+
+                return false
+            }, DELAY_PREVIEW_FLIPPING) // Attend délai avant de retourner les cartes face verso pour permettre la visualisation
         }
     }
 
