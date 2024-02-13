@@ -1,12 +1,18 @@
 'use client'
 import Image from 'next/image'
-import GameBoard from '../GameBoard/GameBoard'
 import React, { useState } from 'react'
 import GameStateEnum from '@/interfaces/gameStateEnum'
 import DifficultyLevelEnum from '@/interfaces/difficultyLevel'
-import { randomInRange, triggerConfetti } from '@/lib/utils/trigger-confetti'
+import { triggerConfetti } from '@/lib/utils/trigger-confetti'
+import Button from '../common/Button/Button'
+import Modal from '../common/Modal/Modal'
+import GameBoard from '../GameBoard/GameBoard'
 
+// En ms
 const DELAY_START_MESSAGE_SHOWED = 4000
+
+// En ms
+const DELAY_BEFORE_DISPLAY_FINISH_MODAL = 1100
 
 const MemoryGame = () => {
     const [gameState, setGameState] = useState<GameStateEnum>(
@@ -15,7 +21,7 @@ const MemoryGame = () => {
 
     // Niveau de difficulté à "moyen" par défaut
     const [difficultyLevel, setDifficultyLevel] = useState<DifficultyLevelEnum>(
-        DifficultyLevelEnum.MEDIUM
+        DifficultyLevelEnum.EASY
     )
 
     const [startMessage, setStartMessage] = useState<{
@@ -29,7 +35,7 @@ const MemoryGame = () => {
         value: string
         showed: boolean
     }>({
-        value: 'GG !',
+        value: 'Victoire !',
         showed: false,
     })
     // Nombre de retournements de cartes
@@ -39,12 +45,15 @@ const MemoryGame = () => {
         DifficultyLevelEnum | undefined
     >(undefined)
 
-    const handleCountFlip = (newCount: number) => {
-        setEndMessage((previousEndMessage) => ({
-            ...previousEndMessage,
-            showed: true,
-        }))
+    const handleCountFlipAtEnd = (newCount: number) => {
         setCountFlip(newCount)
+
+        setTimeout(() => {
+            setEndMessage((previousEndMessage) => ({
+                ...previousEndMessage,
+                showed: true,
+            }))
+        }, DELAY_BEFORE_DISPLAY_FINISH_MODAL)
     }
 
     const handleStartGame = () => {
@@ -64,30 +73,33 @@ const MemoryGame = () => {
     // Fonction appelée pour changer l'état du jeu
     const handleChangeGameState = (newGameState: GameStateEnum) => {
         setGameState(newGameState)
-        if (newGameState === GameStateEnum.FINISHED) {
-            // Confettis à gauche sur l'écran
-            triggerConfetti({
-                particleCount: 100,
-                startVelocity: 40,
-                spread: 360,
-                ticks: 400,
-                origin: {
-                    x: 0.1,
-                    y: 0.2,
-                },
-            })
 
-            // Confettis à droite sur l'écran
-            triggerConfetti({
-                particleCount: 100,
-                startVelocity: 40,
-                spread: 360,
-                ticks: 400,
-                origin: {
-                    x: 0.9,
-                    y: 0.2,
-                },
-            })
+        if (newGameState === GameStateEnum.FINISHED) {
+            setTimeout(() => {
+                // Confettis à gauche sur l'écran
+                triggerConfetti({
+                    particleCount: 100,
+                    startVelocity: 40,
+                    spread: 360,
+                    ticks: 400,
+                    origin: {
+                        x: 0.1,
+                        y: 0.2,
+                    },
+                })
+
+                // Confettis à droite sur l'écran
+                triggerConfetti({
+                    particleCount: 100,
+                    startVelocity: 40,
+                    spread: 360,
+                    ticks: 400,
+                    origin: {
+                        x: 0.9,
+                        y: 0.2,
+                    },
+                })
+            }, DELAY_BEFORE_DISPLAY_FINISH_MODAL)
         }
     }
 
@@ -225,17 +237,17 @@ const MemoryGame = () => {
                                         <i className='ri-skip-left-line scroll-right'></i>
                                     )}
                             </button>
-
-                            <button
-                                className='w-1/2 mt-12 border-2 border-sky-300 rounded-md bg-sky-700 game-menu-button-animation'
+                            <Button
+                                className='w-1/2 mt-12 border-2 border-sky-300 hover:bg-sky-600 rounded-md bg-sky-700 game-menu-button-animation'
                                 onClick={handleStartGame}
                             >
                                 Jouer
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
             )}
+
             {gameState !== GameStateEnum.NOT_STARTED && (
                 <>
                     <div className='flex justify-center mb-8'>
@@ -247,33 +259,54 @@ const MemoryGame = () => {
                         />
                     </div>
 
-                    {startMessage.showed && (
+                    {/* J'arrête d'afficher le message pour le moment, à voir plus tard si supprimé ou modifié */}
+                    {/* {startMessage.showed && (
                         <div className='flex justify-center mb-8'>
                             <p className='animated-message'>
                                 {startMessage.value}
                             </p>
                         </div>
-                    )}
+                    )} */}
 
                     <GameBoard
                         gameState={gameState}
                         totalPairs={difficultyLevel}
-                        onCountFlipChange={handleCountFlip}
+                        onCountFlipChangeAtEnd={handleCountFlipAtEnd}
                         onChangeGameState={handleChangeGameState}
                     />
 
-                    {gameState === GameStateEnum.FINISHED &&
-                        endMessage.showed && (
-                            <div className='flex flex-col items-center mt-8 opacity-80'>
-                                <div>
-                                    <p>
-                                        {endMessage.value} Tu as terminé le jeu,
-                                        avec {countFlip} retournements de
-                                        cartes.
-                                    </p>
+                    <Modal
+                        isOpen={
+                            gameState === GameStateEnum.FINISHED &&
+                            endMessage.showed
+                        }
+                        onClose={() =>
+                            setEndMessage({ ...endMessage, showed: false })
+                        }
+                        width='w-1/3'
+                    >
+                        <div className='flex flex-col items-center text-center opacity-80 text-black mb-4'>
+                            <div className='mb-8'>
+                                <h2 className='font-bold text-4xl text-sky-700'>
+                                    Victoire !
+                                </h2>
+                            </div>
+
+                            <div>
+                                <div className='mb-4'>
+                                    Félicitations, tu as terminé le jeu !
+                                </div>
+                                <div className='grid grid-cols-1 gap-1'>
+                                    <h3 className='font-bold text-lg text-sky-700'>
+                                        Résumé :
+                                    </h3>
+                                    <span>
+                                        Nombre de coups joués : {countFlip}
+                                    </span>
                                 </div>
                             </div>
-                        )}
+                        </div>
+                    </Modal>
                 </>
             )}
         </>
