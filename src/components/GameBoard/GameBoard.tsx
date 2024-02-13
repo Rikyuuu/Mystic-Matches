@@ -3,13 +3,19 @@ import React, { useEffect, useState } from 'react'
 import Card from '../Card/Card'
 import GameStateEnum from '@/interfaces/gameStateEnum'
 
+// En ms
+const DELAY_BEFORE_CHECKING_PAIRS = 700
+
+// En ms
+const DELAY_BEFORE_FLIPPING_BACK = 10
+
 interface GameBoardProps {
     // Nombre de paires de cartes
     totalPairs: number
     // Etat du jeu
     gameState: GameStateEnum
     // Fonction appelée lors de la fin du jeu
-    onCountFlipChange: (newCount: number) => void
+    onCountFlipChangeAtEnd: (newCount: number) => void
     // Fonction appelée lors du changement d'état du jeu
     onChangeGameState: (newGameState: GameStateEnum) => void
 }
@@ -23,13 +29,10 @@ interface CardType {
     isPaired: boolean
 }
 
-const DELAY_BEFORE_CHECKING_PAIRS = 700
-const DELAY_BEFORE_FLIPPING_BACK = 10
-
 const GameBoard = ({
     totalPairs,
     gameState,
-    onCountFlipChange,
+    onCountFlipChangeAtEnd,
     onChangeGameState,
 }: GameBoardProps) => {
     // Stocke les cartes du jeu
@@ -198,7 +201,7 @@ const GameBoard = ({
 
         if (isGameFinished) {
             onChangeGameState(GameStateEnum.FINISHED)
-            onCountFlipChange(countFlipToSend)
+            onCountFlipChangeAtEnd(countFlipToSend)
         }
     }
 
@@ -207,7 +210,7 @@ const GameBoard = ({
             {gameState !== GameStateEnum.FINISHED && (
                 <div>
                     <h2 className='text-2xl text-center mb-4 opacity-80'>
-                        Nombre de retournements : {countFlip}
+                        Nombre de coups joués : {countFlip}
                     </h2>
                 </div>
             )}
